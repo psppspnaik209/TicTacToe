@@ -10,10 +10,13 @@ Might fix them later on
 
 You must at least have a c++ compiler that is version c++11 or above
 
+Get the compiler from here
+https://gcc.gnu.org/
+
 compile using
 
 
-g++ main.cpp game.cpp
+*g++ -std=c++11 main.cpp game.cpp*
 
 Run using
 
