@@ -131,11 +131,18 @@ int getBestMove(vector<char> board, char computerSymbol, char playerSymbol) {
     return move;
 }
 
+// some how dual checking the input for any nonsense charc fixes the infinite loop
 void playerMove(vector<char>& board, char playerSymbol) {
     int move;
     while (true) {
         cout << "Enter your move (1-9): ";
-        cin >> move;
+        if (!(cin >> move)) {
+            cout << "Invalid input. Please enter a number between 1 and 9.\n";
+            cin.clear(); // Clear the error flags
+            cin.ignore(1000, '\n'); // Discard invalid input
+            continue;
+        }
+        cin.ignore(1000, '\n'); // Clear any extra input after the number
         --move; // Adjust for 0-based index
         if (move >= 0 && move < 9 && board[move] == EMPTY) {
             board[move] = playerSymbol;
