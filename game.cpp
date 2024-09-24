@@ -6,14 +6,24 @@
 
 using namespace std;
 
-void displayBoard(const vector<char>& board, bool showPositions) {
+void displayBoard(const vector<char>& board, bool showPositions, const vector<int>& winningCombo) {
     cout << "\n";
     for (int i = 0; i < 9; ++i) {
         char displayChar = board[i];
         if (displayChar == EMPTY) {
             displayChar = showPositions ? ('1' + i) : ' ';
         }
-        cout << " " << displayChar << " ";
+        string cellStr = " ";
+        if (!winningCombo.empty() && find(winningCombo.begin(), winningCombo.end(), i) != winningCombo.end()) {
+            // Cell is part of the winning combination
+            cellStr = "/";
+            cellStr += displayChar;
+            cellStr += "/";
+        } else {
+            cellStr += displayChar;
+            cellStr += " ";
+        }
+        cout << cellStr;
         if (i % 3 != 2) {
             cout << "|";
         } else if (i != 8) {
@@ -43,12 +53,33 @@ bool isWinner(const vector<char>& board, char symbol) {
     return false;
 }
 
+vector<int> getWinningCombination(const vector<char>& board, char symbol) {
+    const int WIN_COMBINATIONS[8][3] = {
+        {0, 1, 2}, // Rows
+        {3, 4, 5},
+        {6, 7, 8},
+        {0, 3, 6}, // Columns
+        {1, 4, 7},
+        {2, 5, 8},
+        {0, 4, 8}, // Diagonals
+        {2, 4, 6}
+    };
+    for (int i = 0; i < 8; ++i) {
+        const int* combo = WIN_COMBINATIONS[i];
+        if (board[combo[0]] == symbol && board[combo[1]] == symbol && board[combo[2]] == symbol) {
+            return vector<int>{combo[0], combo[1], combo[2]};
+        }
+    }
+    return vector<int>(); // No winning combination
+}
+
 bool isBoardFull(const vector<char>& board) {
     for (char cell : board) {
         if (cell == EMPTY) return false;
     }
     return true;
 }
+
 
 int minimax(vector<char> board, char currentPlayer, char computerSymbol, char playerSymbol) {
     if (isWinner(board, computerSymbol)) return 10;
@@ -154,9 +185,9 @@ void playGame() {
                 computerMove(board, computerSymbol, playerSymbol);
             }
             // Display the board without positions
-            displayBoard(board, false);
-
             if (isWinner(board, currentPlayer)) {
+                vector<int> winningCombo = getWinningCombination(board, currentPlayer);
+                displayBoard(board, false, winningCombo);
                 if (currentPlayer == playerSymbol) {
                     cout << "You win!\n";
                     ++playerScore;
@@ -166,9 +197,12 @@ void playGame() {
                 }
                 break;
             } else if (isBoardFull(board)) {
+                displayBoard(board, false);
                 cout << "It's a draw!\n";
                 ++draws;
                 break;
+            } else {
+                displayBoard(board, false);
             }
             currentPlayer = (currentPlayer == 'X') ? 'O' : 'X';
         }
